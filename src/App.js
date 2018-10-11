@@ -11,12 +11,13 @@ class App extends Component {
         fio: "",
         age: "",
         drink: ""
-      }
+      },
+      updIndex: null
     }
     this.handleChange = this.handleChange.bind(this)
     this.getLength = this.getLength.bind(this)
   }
-  
+
   handleChange(e) {
     let data = e.target.value
     this.setState(prevState => ({
@@ -54,7 +55,47 @@ class App extends Component {
         drink: drinkUp
       }
     }))
+  }
+  updateObj(index, item) {
 
+    let fio_id = document.getElementById('fio_id')
+    let age_id = document.getElementById('age_id')
+    let drink_id = document.getElementById('drinkForm')
+
+    let add_id = document.getElementById('addItem')
+    let upd_id = document.getElementById('updateItem')
+
+    add_id.style.display = 'none'
+    upd_id.style.display = 'block'
+
+    fio_id.value = item.fio
+    age_id.value = item.age
+    drink_id.value = item.drink
+
+    this.setState({
+      visitor: {
+        fio: item.fio,
+        age: item.age,
+        drink: item.drink,
+      },
+      updIndex: index
+    })
+
+    console.log(this.state.visitor.fio + " " + this.state.updIndex)
+  }
+
+  updData() {
+    let add_id = document.getElementById('addItem')
+    let upd_id = document.getElementById('updateItem')
+
+    add_id.style.display = "block"
+    upd_id.style.display = "none"
+
+    this.props.update({
+      fio: this.state.visitor.fio,
+      age: this.state.visitor.age,
+      drink: this.state.visitor.drink
+    }, this.state.updIndex)
   }
 
   render() {
@@ -100,7 +141,7 @@ class App extends Component {
             </div>
           </div>
           <div className='form-row pt-4'>
-            <div className='col' align='center'>
+            <div className='col' align='center' id="addItem">
               <button type="button"
                 onClick={() => {
                   this.props.add({
@@ -113,6 +154,13 @@ class App extends Component {
                 Добавить
               </button>
             </div>
+            <div className='col' id="updateItem" align='center' style={{ "display": "none" }}>
+              <button type="button"
+                onClick={this.updData.bind(this)}
+                className="btn btn-info">
+                Update
+              </button>
+            </div>
           </div>
         </form>
         <div className='row pt-4'>
@@ -122,10 +170,13 @@ class App extends Component {
                 this.props.list.map((item, index) =>
                   <li key={index}>
                     <div className='col pt-5'>
-                      <span className='pr-5'>{item.fio === null}</span> <span className='pr-5'>{item.age}</span> <span className='pr-5'>{item.drink}</span>
-                      <button className="btn btn-danger"
+                      <span className='pr-5'>{item.fio}</span> <span className='pr-5'>{item.age}</span> <span className='pr-5'>{item.drink}</span>
+                      <button className="btn btn-danger mr-2"
                         onClick={() => this.props.remove(index)}
                       >Delete</button>
+                      <button className="btn btn-info"
+                        onClick={() => this.updateObj(index, item)}
+                      >Update</button>
                     </div>
                   </li>
                 )
@@ -151,6 +202,9 @@ function mapDispatchToProps(dispatch) {
     },
     remove: (index) => {
       dispatch({ type: 'REMOVE', payload: index })
+    },
+    update: (value, index) => {
+      dispatch({ type: 'UPDATE', payload: index, upd_value: value })
     }
   }
 }
